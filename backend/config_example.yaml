@@ -1,0 +1,8 @@
+refresh_period_seconds: 10
+services:
+  - url: https://www.w3schools.com/
+    expected_status_code: 200
+    # xpaths:
+    #   - 
+  - url: https://github.com/
+    expected_status_code: 200
