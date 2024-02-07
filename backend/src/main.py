@@ -1,28 +1,46 @@
-from fastapi import FastAPI
-from fastapi import status
-from fastapi_restful.tasks import repeat_every
-from contextlib import asynccontextmanager
-from celery.app import Celery
-# from celery.result import AsyncResult
 import os
-from .utils import YamlReader
-from .services import WebHealthChecker
+from contextlib import asynccontextmanager
+
+from celery.app import Celery
+from celery.result import AsyncResult
+from fastapi import FastAPI, status
 from fastapi.responses import JSONResponse
-# from src.services import WebHealthChecker
+from fastapi_restful.tasks import repeat_every
+from tinydb import Query
+
+from .services import WebHealthChecker
+from .utils import YamlReader, CollectionProvider
+from .models import ServiceState, State
+import datetime as dt
+
 
 redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
 celery_app = Celery(__name__, broker=redis_url, backend=redis_url)
 
-config = YamlReader.read("./config.yaml")       # TODO validate with pydantic models
+config = YamlReader.read("./config.yaml")       # TODO validate data with pydantic models
+
+collection_provider = CollectionProvider()
+ServiceQuery = Query()
+services_collection = collection_provider.provide("services")
 
 @celery_app.task
-def sub_task(url: str, expected_status_code: str):
+def sub_task(service_index: int, url: str, expected_status_code: str) -> State:
     print(f"{url} -- {expected_status_code}")
-    msg = WebHealthChecker().check(url, expected_status_code)
-    return msg
+    state = WebHealthChecker().check(url, expected_status_code)
+    service_state = ServiceState(
+        index=service_index,
+        url=url,
+        state=state,
+        last_updated=dt.datetime.now().isoformat()
+    )
+    # ? https://tinydb.readthedocs.io/en/stable/api.html?highlight=upsert#tinydb.table.Table.upsert
+    services_collection.upsert(service_state.model_dump(), ServiceQuery.index == service_index)
+    return state
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # ? https://fastapi.tiangolo.com/advanced/events/
     await main_task()
     yield
 
@@ -33,7 +51,6 @@ app = FastAPI(lifespan=lifespan)
 @app.get("/api/v1/task/{task_id}")
 def get_task(task_id: str):
     res = celery_app.AsyncResult(task_id)
-
     return JSONResponse(
         content={
             "result": res.result,
@@ -44,14 +61,8 @@ def get_task(task_id: str):
     )
 
 
-@repeat_every(seconds=5)
+@repeat_every(seconds=config['refresh_period_seconds'])
 async def main_task() -> None:
-    for service in config['services']:
-        # print(f"{service['url']} -- {service['expected_status_code']}")
-        # res -> task_id, status, result
-        res = sub_task.delay(service['url'], service['expected_status_code'])       # return async result probably
+    for idx, service in enumerate(config['services']):
+        res: AsyncResult = sub_task.delay(idx, service['url'], service['expected_status_code'])
         print(f"Task ID: {res.task_id}")
-
-
-# from backend folder
-# celery --app=src.main.celery_app worker --concurrency=4 --loglevel=DEBUG

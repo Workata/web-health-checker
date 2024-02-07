@@ -5,8 +5,9 @@ PyYAML==6.0.1
 requests==2.31.0
 
 fastapi==0.109.2
+# fastapi-utils==0.2.1  # doesnt support pydantic >= 2.0
 fastapi-restful==0.5.0  # fork of fastapi-utils
 typing-inspect==0.9.0
 celery[redis]==5.3.6
-# fastapi-utils==0.2.1  # doesnt support pydantic >= 2.0
+tinydb==4.8.0
 uvicorn[standard]==0.27.0.post1
