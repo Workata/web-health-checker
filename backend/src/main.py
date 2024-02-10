@@ -13,6 +13,7 @@ from .services import WebHealthChecker
 from .utils import YamlReader, CollectionProvider
 from .models import ServiceState, State
 import datetime as dt
+import typing as t
 
 
 redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
@@ -23,20 +24,6 @@ config = YamlReader.read("./config.yaml")       # TODO validate data with pydant
 collection_provider = CollectionProvider()
 ServiceQuery = Query()
 services_collection = collection_provider.provide("services")
-
-@celery_app.task
-def sub_task(service_index: int, url: str, expected_status_code: str) -> State:
-    print(f"{url} -- {expected_status_code}")
-    state, details = WebHealthChecker().check(url, expected_status_code)
-    service_state = ServiceState(
-        index=service_index,
-        state=state,
-        last_updated=dt.datetime.now().isoformat(),
-        details=details
-    )
-    # ? https://tinydb.readthedocs.io/en/stable/api.html?highlight=upsert#tinydb.table.Table.upsert
-    services_collection.upsert(service_state.model_dump(), ServiceQuery.index == service_index)
-    return state
 
 
 @asynccontextmanager
@@ -91,9 +78,21 @@ def get_config():
     )
 
 
+@celery_app.task
+def sub_task(service_index: int, service: t.Any) -> State:
+    state, details = WebHealthChecker().check(service)
+    service_state = ServiceState(
+        index=service_index,
+        state=state,
+        last_updated=dt.datetime.now().isoformat(),
+        details=details
+    )
+    # ? https://tinydb.readthedocs.io/en/stable/api.html?highlight=upsert#tinydb.table.Table.upsert
+    services_collection.upsert(service_state.model_dump(), ServiceQuery.index == service_index)
+    return state
 
 @repeat_every(seconds=config['refresh_period_seconds'])
 async def main_task() -> None:
     for idx, service in enumerate(config['services']):
-        res: AsyncResult = sub_task.delay(idx, service['url'], service['expected_status_code'])
+        res: AsyncResult = sub_task.delay(idx, service)
         print(f"Task ID: {res.task_id}")

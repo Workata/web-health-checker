@@ -47,7 +47,7 @@ function App() {
 
   useEffect(() => {
     // ? https://rapidapi.com/guides/api-requests-intervals
-    // TODO prevert making double requests on page load
+    // TODO prevent making double requests on page load
   
     let interval = setInterval(getServicesState, 5000);
     getServicesState();
@@ -75,12 +75,12 @@ function App() {
         Web Health Checker
       </Typography>
 
-      <TableContainer component={Paper}  sx={{backgroundColor: "#555a64", color: 'white'}}>
-        <Table sx={{ minWidth: 650,  color: 'white' }} aria-label="simple table" >
+      <TableContainer component={Paper}  sx={{backgroundColor: "#555a64"}}>
+        <Table sx={{ minWidth: 650 }} aria-label="simple table" >
           <TableHead>
             <TableRow>
               <TableCell sx={tableHeaderStyle}>url</TableCell>
-              <TableCell align="center" sx={tableHeaderStyle}>Expected code</TableCell>
+              <TableCell align="center" sx={tableHeaderStyle}>Expected status code</TableCell>
               <TableCell align="center" sx={tableHeaderStyle}>Last updated</TableCell>
               <TableCell align="left" sx={tableHeaderStyle}>State</TableCell>
               <TableCell align="left" sx={tableHeaderStyle}>Details</TableCell>
