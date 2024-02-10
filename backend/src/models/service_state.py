@@ -9,7 +9,7 @@ class State(str, Enum):
                 additional information should be passed via details in ServiceState model
         RED     - status code is not ok (not equal to expected); other checks are omitted
     """
-    GREEN = 'ok'
+    GREEN = 'green'
     YELLOW = 'yellow'
     RED = 'red'
 

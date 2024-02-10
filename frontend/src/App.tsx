@@ -6,6 +6,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { Box, Typography } from "@mui/material";
+import TrafficLight from "./components/TrafficLight"
 import { useEffect, useState } from 'react';
 import './App.css';
 
@@ -31,6 +32,19 @@ function App() {
     return `${date} ${time}`;
   }
 
+  const getTrafficLight = (trafficLightValue: string): any => {
+    switch(trafficLightValue) {
+      case 'red':
+        return <TrafficLight color="red"/>;
+      case 'yellow':
+        return <TrafficLight color="yellow"/>;
+      case 'green':
+        return <TrafficLight color="green"/>;
+      default:
+        return <TrafficLight color="grey"/>;
+    }
+  }
+
   useEffect(() => {
     // ? https://rapidapi.com/guides/api-requests-intervals
     // TODO prevert making double requests on page load
@@ -45,6 +59,16 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const tableHeaderStyle = {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: '15px'
+  }
+
+  const tableCellStyle = {
+    color: 'white',
+  }
+
   return (
     <Box>
       <Typography variant="h3" sx={{textAlign: 'center', marginTop: '30px', marginBottom: '30px'}}>
@@ -55,11 +79,11 @@ function App() {
         <Table sx={{ minWidth: 650,  color: 'white' }} aria-label="simple table" >
           <TableHead>
             <TableRow>
-              <TableCell sx={{color: 'white'}}>url</TableCell>
-              <TableCell align="right" sx={{color: 'white'}}>Expected code</TableCell>
-              <TableCell align="right" sx={{color: 'white'}}>Last updated</TableCell>
-              <TableCell align="right" sx={{color: 'white'}}>State</TableCell>
-              <TableCell align="right" sx={{color: 'white'}}>Details</TableCell>
+              <TableCell sx={tableHeaderStyle}>url</TableCell>
+              <TableCell align="center" sx={tableHeaderStyle}>Expected code</TableCell>
+              <TableCell align="center" sx={tableHeaderStyle}>Last updated</TableCell>
+              <TableCell align="left" sx={tableHeaderStyle}>State</TableCell>
+              <TableCell align="left" sx={tableHeaderStyle}>Details</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -73,10 +97,10 @@ function App() {
                   sx={{ '&:last-child td, &:last-child th': { border: 0 }, color: 'white' }}
                 >
                   <TableCell component="th" scope="row" sx={{color: 'white'}}>{row.url}</TableCell>
-                  <TableCell align="right" sx={{color: 'white'}}>{row.expected_status_code}</TableCell>
-                  <TableCell align="right" sx={{color: 'white'}}>{service ? convertIsoString(service.last_updated) : ''}</TableCell>
-                  <TableCell align="right" sx={{color: 'white'}}>{service ? service.state : ''}</TableCell>
-                  <TableCell align="right" sx={{color: 'white'}}>{service ? service.details : ''}</TableCell>
+                  <TableCell align="center" sx={{color: 'white'}}>{row.expected_status_code}</TableCell>
+                  <TableCell align="center" sx={{color: 'white', minWidth: '150px'}}>{service ? convertIsoString(service.last_updated) : ''}</TableCell>
+                  <TableCell className="stateValueCell" sx={{color: 'white'}}>{service ? getTrafficLight(service.state) : <TrafficLight color="grey"/>}</TableCell>
+                  <TableCell align="left" sx={{color: 'white', maxWidth: '600px'}}>{service ? service.details : ''}</TableCell>
                 </TableRow>
               )
             })}
