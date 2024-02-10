@@ -90,11 +90,12 @@ def sub_task(service_index: int) -> t.Dict[str, t.Any]:
     state = ServiceState(
         index=service_index,
         state=result.state,
+        response_time_miliseconds=round(result.response_time_miliseconds, 2) if result.response_time_miliseconds else None, # ''
         last_updated=dt.datetime.now().isoformat(),
         details=result.message
     )
     services_collection.upsert(state.model_dump(), ServiceQuery.index == service_index)
-    return state.model_dump()
+    return state.model_dump() # ''
 
 @repeat_every(seconds=config.refresh_period_seconds)
 async def main_task() -> None:
