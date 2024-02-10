@@ -1,0 +1,20 @@
+refresh_period_seconds: 15
+services:
+
+    # * this example check should should be green
+  - url: https://www.w3schools.com/
+    expected_status_code: 200
+    xpath: "//*[contains(text(), 'Log in')]"
+
+    # * this one should be yellow
+  - url: https://github.com/
+    expected_status_code: 200
+    xpath: "//*[contains(text(), 'some dummy string that is not on the page')]"
+
+    # * green
+  - url: https://jsonplaceholder.typicode.com/
+    expected_status_code: 200
+
+    # * red
+  - url: https://nonExistingDomainToCheckHowProgramBehavesIfCannotMakeARequest.com/
+    expected_status_code: 200
