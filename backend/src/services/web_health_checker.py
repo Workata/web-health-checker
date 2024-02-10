@@ -8,5 +8,5 @@ class WebHealthChecker:
         res = requests.get(url)
         print(f"Received status code: {res.status_code}")
         if res.status_code == expected_status_code:
-            return State.OK
-        return State.NOT_OK
+            return State.GREEN
+        return State.RED

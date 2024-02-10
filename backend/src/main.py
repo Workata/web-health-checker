@@ -6,6 +6,7 @@ from celery.result import AsyncResult
 from fastapi import FastAPI, status
 from fastapi.responses import JSONResponse
 from fastapi_restful.tasks import repeat_every
+from fastapi.middleware.cors import CORSMiddleware
 from tinydb import Query
 
 from .services import WebHealthChecker
@@ -47,6 +48,16 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/api/v1/task/{task_id}")
 def get_task(task_id: str):
@@ -59,6 +70,26 @@ def get_task(task_id: str):
         },
         status_code=status.HTTP_200_OK
     )
+
+
+@app.get("/api/v1/services")
+def get_services():
+    services_coll = collection_provider.provide("services")
+    return JSONResponse(content=services_coll.all(), status_code=status.HTTP_200_OK)
+
+
+
+@app.get("/api/v1/config")
+def get_config():
+    return JSONResponse(
+        content=[{
+            "index": idx,
+            "url": service['url'],
+            "expected_status_code": service['expected_status_code']
+        } for idx, service in enumerate(config['services'])],
+        status_code=status.HTTP_200_OK
+    )
+
 
 
 @repeat_every(seconds=config['refresh_period_seconds'])
