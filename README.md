@@ -2,7 +2,7 @@
 
 
 <p align="center">
-  <img src="imgs/ui.png"  alt="ui"/>
+  <img src="imgs/front_ss.png"  alt="ui"/>
 </p>
 
 Create a config file (based on example)
