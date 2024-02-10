@@ -100,7 +100,7 @@ function App() {
                   <TableCell align="center" sx={{color: 'white'}}>{row.expected_status_code}</TableCell>
                   <TableCell align="center" sx={{color: 'white', minWidth: '150px'}}>{service ? convertIsoString(service.last_updated) : ''}</TableCell>
                   <TableCell className="stateValueCell" sx={{color: 'white'}}>{service ? getTrafficLight(service.state) : <TrafficLight color="grey"/>}</TableCell>
-                  <TableCell align="left" sx={{color: 'white', maxWidth: '600px'}}>{service ? service.details : ''}</TableCell>
+                  <TableCell align="left" sx={{color: 'white', maxWidth: '600px', wordWrap: 'break-word'}}>{service ? service.details : ''}</TableCell>
                 </TableRow>
               )
             })}
