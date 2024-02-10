@@ -80,7 +80,7 @@ function App() {
           <TableHead>
             <TableRow>
               <TableCell sx={tableHeaderStyle}>url</TableCell>
-              <TableCell align="center" sx={tableHeaderStyle}>Expected status code</TableCell>
+              <TableCell align="center" sx={tableHeaderStyle}>Response time [ms]</TableCell>
               <TableCell align="center" sx={tableHeaderStyle}>Last updated</TableCell>
               <TableCell align="left" sx={tableHeaderStyle}>State</TableCell>
               <TableCell align="left" sx={tableHeaderStyle}>Details</TableCell>
@@ -97,7 +97,7 @@ function App() {
                   sx={{ '&:last-child td, &:last-child th': { border: 0 }, color: 'white' }}
                 >
                   <TableCell component="th" scope="row" sx={{color: 'white'}}>{row.url}</TableCell>
-                  <TableCell align="center" sx={{color: 'white'}}>{row.expected_status_code}</TableCell>
+                  <TableCell align="center" sx={{color: 'white'}}>{service ? (service.response_time_miliseconds ? service.response_time_miliseconds : '---') : '---'}</TableCell>
                   <TableCell align="center" sx={{color: 'white', minWidth: '150px'}}>{service ? convertIsoString(service.last_updated) : ''}</TableCell>
                   <TableCell className="stateValueCell" sx={{color: 'white'}}>{service ? getTrafficLight(service.state) : <TrafficLight color="grey"/>}</TableCell>
                   <TableCell align="left" sx={{color: 'white', maxWidth: '600px'}}>{service ? service.details : ''}</TableCell>

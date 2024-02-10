@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from .state import State
+import typing as t
 
 
 class ServiceState(BaseModel):
@@ -10,4 +11,5 @@ class ServiceState(BaseModel):
     index: int
     state: State
     last_updated: str
+    response_time_miliseconds: t.Optional[float] = None
     details: str = ''

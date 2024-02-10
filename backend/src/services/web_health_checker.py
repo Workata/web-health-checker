@@ -32,7 +32,7 @@ class WebHealthChecker:
                 state=State.YELLOW,
                 response_time_miliseconds=self._get_response_time(res),
                 message=(
-                    f"Status code is ok, but given Xpath expression \"{service.xpath}\" is not "
+                    f"Status code is ok, but given Xpath expression '{service.xpath}' is not "
                     "pointing to any element on the page. Most likely element is missing!"
                 )
             )
