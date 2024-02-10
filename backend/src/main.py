@@ -11,7 +11,7 @@ from tinydb import Query
 
 from .services import WebHealthChecker
 from .utils import YamlReader, CollectionProvider
-from .models import ServiceState, State
+from .models import ServiceState, Config, ServiceConfig, HealthCheckResult
 import datetime as dt
 import typing as t
 
@@ -19,7 +19,7 @@ import typing as t
 redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
 celery_app = Celery(__name__, broker=redis_url, backend=redis_url)
 
-config = YamlReader.read("./config.yaml")       # TODO validate data with pydantic models
+config = Config(**YamlReader.read("./config.yaml"))
 
 collection_provider = CollectionProvider()
 ServiceQuery = Query()
@@ -28,7 +28,9 @@ services_collection = collection_provider.provide("services")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # ? https://fastapi.tiangolo.com/advanced/events/
+    """ 
+        ? https://fastapi.tiangolo.com/advanced/events/ 
+    """
     await main_task()
     yield
 
@@ -71,28 +73,31 @@ def get_config():
     return JSONResponse(
         content=[{
             "index": idx,
-            "url": service['url'],
-            "expected_status_code": service['expected_status_code']
-        } for idx, service in enumerate(config['services'])],
+            "url": service.url,
+            "expected_status_code": service.expected_status_code
+        } for idx, service in enumerate(config.services)],
         status_code=status.HTTP_200_OK
     )
 
 
 @celery_app.task
-def sub_task(service_index: int, service: t.Any) -> State:
-    state, details = WebHealthChecker().check(service)
-    service_state = ServiceState(
+def sub_task(service_index: int) -> t.Dict[str, t.Any]:
+    """
+        ? https://tinydb.readthedocs.io/en/stable/api.html?highlight=upsert#tinydb.table.Table.upsert
+    """
+    service = config.services[service_index]
+    result: HealthCheckResult = WebHealthChecker().check(service)
+    state = ServiceState(
         index=service_index,
-        state=state,
+        state=result.state,
         last_updated=dt.datetime.now().isoformat(),
-        details=details
+        details=result.message
     )
-    # ? https://tinydb.readthedocs.io/en/stable/api.html?highlight=upsert#tinydb.table.Table.upsert
-    services_collection.upsert(service_state.model_dump(), ServiceQuery.index == service_index)
-    return state
+    services_collection.upsert(state.model_dump(), ServiceQuery.index == service_index)
+    return state.model_dump()
 
-@repeat_every(seconds=config['refresh_period_seconds'])
+@repeat_every(seconds=config.refresh_period_seconds)
 async def main_task() -> None:
-    for idx, service in enumerate(config['services']):
-        res: AsyncResult = sub_task.delay(idx, service)
-        print(f"Task ID: {res.task_id}")
+    for idx in range(len(config.services)):
+        res: AsyncResult = sub_task.delay(idx)
+        print(f"Task ID: {res.task_id}")        # TODO remove debugging prints

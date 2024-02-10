@@ -11,10 +11,18 @@ services:
     expected_status_code: 200
     xpath: "//*[contains(text(), 'some dummy string that is not on the page')]"
 
-    # * green
-  - url: https://jsonplaceholder.typicode.com/
+    # * red
+  - url: https://nonExistingDomainForReal.com/
     expected_status_code: 200
 
-    # * red
-  - url: https://nonExistingDomainToCheckHowProgramBehavesIfCannotMakeARequest.com/
+    # * red - should return 404 instead of 200
+  - url: https://jsonplaceholder.typicode.com/posts/2137
     expected_status_code: 200
+
+    # * green
+  - url: https://jsonplaceholder.typicode.com/posts/1
+    expected_status_code: 200
+
+    # * red - should return 200 instead of 404
+  - url: https://jsonplaceholder.typicode.com/posts/1
+    expected_status_code: 404
