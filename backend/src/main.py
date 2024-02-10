@@ -27,12 +27,12 @@ services_collection = collection_provider.provide("services")
 @celery_app.task
 def sub_task(service_index: int, url: str, expected_status_code: str) -> State:
     print(f"{url} -- {expected_status_code}")
-    state = WebHealthChecker().check(url, expected_status_code)
+    state, details = WebHealthChecker().check(url, expected_status_code)
     service_state = ServiceState(
         index=service_index,
-        url=url,
         state=state,
-        last_updated=dt.datetime.now().isoformat()
+        last_updated=dt.datetime.now().isoformat(),
+        details=details
     )
     # ? https://tinydb.readthedocs.io/en/stable/api.html?highlight=upsert#tinydb.table.Table.upsert
     services_collection.upsert(service_state.model_dump(), ServiceQuery.index == service_index)

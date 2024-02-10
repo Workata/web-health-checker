@@ -24,7 +24,6 @@ class ServiceState(BaseModel):
             https://tinydb.readthedocs.io/en/v2.4/extend.html
     """
     index: int
-    url: str
     state: State
     last_updated: str
     details: str = ''
