@@ -27,9 +27,9 @@ services_collection = collection_provider.provide("services")
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    """ 
-        ? https://fastapi.tiangolo.com/advanced/events/ 
+async def lifespan(app: FastAPI) -> t.Any:
+    """
+    ? https://fastapi.tiangolo.com/advanced/events/
     """
     await main_task()
     yield
@@ -49,56 +49,59 @@ app.add_middleware(
 
 
 @app.get("/api/v1/task/{task_id}")
-def get_task(task_id: str):
+def get_task(task_id: str) -> JSONResponse:
     res = celery_app.AsyncResult(task_id)
     return JSONResponse(
-        content={
-            "result": res.result,
-            "id": task_id,
-            "status": res.status
-        },
-        status_code=status.HTTP_200_OK
+        content={"result": res.result, "id": task_id, "status": res.status},
+        status_code=status.HTTP_200_OK,
     )
 
 
 @app.get("/api/v1/services")
-def get_services():
+def get_services() -> JSONResponse:
     services_coll = collection_provider.provide("services")
     return JSONResponse(content=services_coll.all(), status_code=status.HTTP_200_OK)
 
 
-
 @app.get("/api/v1/config")
-def get_config():
+def get_config() -> JSONResponse:
     return JSONResponse(
-        content=[{
-            "index": idx,
-            "url": service.url,
-            "expected_status_code": service.expected_status_code
-        } for idx, service in enumerate(config.services)],
-        status_code=status.HTTP_200_OK
+        content=[
+            {
+                "index": idx,
+                "url": service.url,
+                "expected_status_code": service.expected_status_code,
+            }
+            for idx, service in enumerate(config.services)
+        ],
+        status_code=status.HTTP_200_OK,
     )
 
 
 @celery_app.task
 def sub_task(service_index: int) -> t.Dict[str, t.Any]:
     """
-        ? https://tinydb.readthedocs.io/en/stable/api.html?highlight=upsert#tinydb.table.Table.upsert
+    ? https://tinydb.readthedocs.io/en/stable/api.html?highlight=upsert#tinydb.table.Table.upsert
     """
     service = config.services[service_index]
     result: HealthCheckResult = WebHealthChecker().check(service)
     state = ServiceState(
         index=service_index,
         state=result.state,
-        response_time_miliseconds=round(result.response_time_miliseconds, 2) if result.response_time_miliseconds else None,
+        response_time_miliseconds=(
+            round(result.response_time_miliseconds, 2)
+            if result.response_time_miliseconds
+            else None
+        ),
         last_updated=dt.datetime.now(dt.timezone.utc).isoformat(),
-        details=result.message
+        details=result.message,
     )
     services_collection.upsert(state.model_dump(), ServiceQuery.index == service_index)
-    return state.model_dump()
+    return state.model_dump()  # type: ignore[no-any-return]
+
 
 @repeat_every(seconds=config.refresh_period_seconds)
 async def main_task() -> None:
     for idx in range(len(config.services)):
         res: AsyncResult = sub_task.delay(idx)
-        print(f"Task ID: {res.task_id}")        # TODO remove debugging prints
+        print(f"Task ID: {res.task_id}")  # TODO remove debugging prints

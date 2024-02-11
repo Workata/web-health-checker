@@ -1,0 +1,39 @@
+name: backend
+
+on:
+  push:
+    paths-ignore:
+      - '**/README.md'
+      - 'scripts/*'
+      - 'imgs/*'
+      - 'LICENSE'
+      - '.env.example'
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+
+    env:
+      DEVCONTAINER_COMPOSE_PATH: ./backend/.devcontainer/docker-compose.devcontainer.build.yml
+      EXECUTE_IN_CONTAINER: docker exec backend-dev-container
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: build and run compose for testing
+      run: docker-compose -f $DEVCONTAINER_COMPOSE_PATH up -d
+
+    - name: check formatter (black)
+      run: $EXECUTE_IN_CONTAINER black src/ --check --diff --color
+
+    - name: check linter (flake8)
+      run: $EXECUTE_IN_CONTAINER flake8 src/ --statistics --tee
+
+    - name: check typing (mypy)
+      run: $EXECUTE_IN_CONTAINER mypy src/
+
+    - name: check unit tests with pytest
+      run: $EXECUTE_IN_CONTAINER pytest ./src/
+
+    - name: Down compose
+      run: docker-compose -f $DEVCONTAINER_COMPOSE_PATH down
