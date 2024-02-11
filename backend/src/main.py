@@ -1,20 +1,26 @@
+import datetime as dt
+import logging
+import logging.config
 import os
+import typing as t
 from contextlib import asynccontextmanager
 
 from celery.app import Celery
-from celery.result import AsyncResult
 from fastapi import FastAPI, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi_restful.tasks import repeat_every
-from fastapi.middleware.cors import CORSMiddleware
 from tinydb import Query
 
+from .models import Config, HealthCheckResult, ServiceState
 from .services import WebHealthChecker
-from .utils import YamlReader, CollectionProvider
-from .models import ServiceState, Config, HealthCheckResult
-import datetime as dt
-import typing as t
+from .settings import get_settings
+from .utils import CollectionProvider, YamlReader
 
+
+settings = get_settings()
+logging.config.dictConfig(settings.logging)
+logger = logging.getLogger("general")
 
 redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
 celery_app = Celery(__name__, broker=redis_url, backend=redis_url)
@@ -48,15 +54,6 @@ app.add_middleware(
 )
 
 
-@app.get("/api/v1/task/{task_id}")
-def get_task(task_id: str) -> JSONResponse:
-    res = celery_app.AsyncResult(task_id)
-    return JSONResponse(
-        content={"result": res.result, "id": task_id, "status": res.status},
-        status_code=status.HTTP_200_OK,
-    )
-
-
 @app.get("/api/v1/services")
 def get_services() -> JSONResponse:
     services_coll = collection_provider.provide("services")
@@ -85,6 +82,12 @@ def sub_task(service_index: int) -> t.Dict[str, t.Any]:
     """
     service = config.services[service_index]
     result: HealthCheckResult = WebHealthChecker().check(service)
+    logger.info(
+        f"URL: {service.url}, status: {result.state}, response time: "
+        f"{result.response_time_miliseconds if result.response_time_miliseconds is not None else '---'} "
+        f"message: {result.message} "
+        f"traceback: {result.error_message if result.error_message is not None else '---'}"
+    )
     state = ServiceState(
         index=service_index,
         state=result.state,
@@ -103,5 +106,4 @@ def sub_task(service_index: int) -> t.Dict[str, t.Any]:
 @repeat_every(seconds=config.refresh_period_seconds)
 async def main_task() -> None:
     for idx in range(len(config.services)):
-        res: AsyncResult = sub_task.delay(idx)
-        print(f"Task ID: {res.task_id}")  # TODO remove debugging prints
+        sub_task.delay(idx)

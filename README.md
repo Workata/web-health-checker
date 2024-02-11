@@ -20,6 +20,13 @@ cp -n config_example.yaml config.yaml
 
 2. Run app with
 ```sh
+docker compose build
+docker compose up
+```
+
+*Note: If you change a config file while app is running you need to restart*
+```sh
+docker compose down
 docker compose up
 ```
 
@@ -34,7 +41,7 @@ docker compose up
 
 #### Development
 
-[Create config file](#running-the-app)
+[Create a config file](#running-the-app)
 
 Run redis
 ```sh
@@ -63,9 +70,3 @@ cd frontend
 npm install --force
 npm start
 ```
-
-
-TODO:
-- [ ] Logs (use python logging with custom setup)
-- [ ] Code cleanup
-- [ ] config file description
