@@ -11,7 +11,7 @@ from tinydb import Query
 
 from .services import WebHealthChecker
 from .utils import YamlReader, CollectionProvider
-from .models import ServiceState, Config, ServiceConfig, HealthCheckResult
+from .models import ServiceState, Config, HealthCheckResult
 import datetime as dt
 import typing as t
 
@@ -90,12 +90,12 @@ def sub_task(service_index: int) -> t.Dict[str, t.Any]:
     state = ServiceState(
         index=service_index,
         state=result.state,
-        response_time_miliseconds=round(result.response_time_miliseconds, 2) if result.response_time_miliseconds else None, # ''
-        last_updated=dt.datetime.now().isoformat(),
+        response_time_miliseconds=round(result.response_time_miliseconds, 2) if result.response_time_miliseconds else None,
+        last_updated=dt.datetime.now(dt.timezone.utc).isoformat(),
         details=result.message
     )
     services_collection.upsert(state.model_dump(), ServiceQuery.index == service_index)
-    return state.model_dump() # ''
+    return state.model_dump()
 
 @repeat_every(seconds=config.refresh_period_seconds)
 async def main_task() -> None:

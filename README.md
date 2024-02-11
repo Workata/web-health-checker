@@ -1,4 +1,6 @@
-# web-health-checker
+# Web Health Checker
+
+App that monitors web sites and reports their availability. This tool is intended as a monitoring tool for web site administrators for detecting problems on their sites.
 
 
 <p align="center">
@@ -16,4 +18,3 @@ TODO:
 - [ ] Logs (use python logging with custom setup)
 - [ ] Code refactor (back/front), validation, typing etc
 - [ ] docs (readme)
-- [ ] deploy (root level docker compose)
