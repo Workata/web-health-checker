@@ -23,6 +23,8 @@ cp -n config_example.yaml config.yaml
 docker compose up
 ```
 
+3. Visit http://localhost:3000
+
 #### Dev prerequisites
 *Note: versions in Dockerfiles are more up to date and app should still work so you can check there*
 - docker (v. 20.10.23)

@@ -8,8 +8,6 @@ import TableRow from '@mui/material/TableRow';
 import { Box, Typography } from "@mui/material";
 import TrafficLight from "./components/TrafficLight"
 import { useEffect, useState } from 'react';
-import './App.css';
-
 
 function App() {
   const [services, setServices] = useState<any>();
@@ -62,10 +60,6 @@ function App() {
     color: 'white',
     fontWeight: 'bold',
     fontSize: '15px'
-  }
-
-  const tableCellStyle = {
-    color: 'white',
   }
 
   return (
