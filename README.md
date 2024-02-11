@@ -67,4 +67,5 @@ npm start
 
 TODO:
 - [ ] Logs (use python logging with custom setup)
-- [ ] Code refactor (back/front), validation, typing etc
+- [ ] Code cleanup
+- [ ] config file description

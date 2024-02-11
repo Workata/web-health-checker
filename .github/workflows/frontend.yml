@@ -1,0 +1,30 @@
+name: frontend-checks
+
+on:
+  push:
+    paths-ignore:
+      - 'backend/*'
+      - '**/README.md'
+      - 'scripts/*'
+      - 'imgs/*'
+      - 'LICENSE'
+      - '.env.example'
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install packages
+      run: npm ci --force
+
+    - name: Check fromatting with prettier
+      run: npm run prettier
+
+    - name: Lint with eslint
+      run: npm run lint

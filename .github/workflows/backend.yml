@@ -1,8 +1,9 @@
-name: backend
+name: backend-checks
 
 on:
   push:
     paths-ignore:
+      - 'frontend/*'
       - '**/README.md'
       - 'scripts/*'
       - 'imgs/*'
