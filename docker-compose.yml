@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+
+  backend:
+    build:
+      context: ./backend
+    command: uvicorn src.main:app --reload --port=8000
+    ports:
+      - 8000:8000
+    volumes:
+      - ./backend/data:/data
+      - ./backend/config.yaml:/config.yaml
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+      - celery
+
+  celery:
+    build:
+      context: ./backend
+    command: celery --app=src.main.celery_app worker --concurrency=4 --loglevel=DEBUG
+    volumes:
+      - ./backend/data:/data
+      - ./backend/config.yaml:/config.yaml
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7
+
+  # TODO frontend
