@@ -13,6 +13,8 @@ function App() {
   const [services, setServices] = useState<any>();
   const [configData, setConfigData] = useState<any>();
 
+  const SERVICE_REQUEST_INTERVAL_SECONDS = 1;
+
   async function getConfig() {
     const response = await fetch(`http://localhost:8000/api/v1/config`);
     setConfigData(await response.json());
@@ -31,13 +33,13 @@ function App() {
   const getTrafficLight = (trafficLightValue: string): any => {
     switch (trafficLightValue) {
       case "red":
-        return <TrafficLight color="red" />;
+        return <TrafficLight color="#bd4c39" />;
       case "yellow":
-        return <TrafficLight color="yellow" />;
+        return <TrafficLight color="#b9c225" />;
       case "green":
-        return <TrafficLight color="green" />;
+        return <TrafficLight color="#0f571e" />;
       default:
-        return <TrafficLight color="grey" />;
+        return <TrafficLight color="#525753" />;
     }
   };
 
@@ -45,7 +47,10 @@ function App() {
     // ? https://rapidapi.com/guides/api-requests-intervals
     // TODO prevent making double requests on page load
 
-    let interval = setInterval(getServicesState, 5000);
+    let interval = setInterval(
+      getServicesState,
+      SERVICE_REQUEST_INTERVAL_SECONDS * 1000,
+    );
     getServicesState();
     if (!configData) getConfig();
 
@@ -70,7 +75,11 @@ function App() {
         Web Health Checker
       </Typography>
 
-      <TableContainer component={Paper} sx={{ backgroundColor: "#555a64" }}>
+      {/*  #555a64 rgb(16, 20, 24) #403d35 */}
+      <TableContainer
+        component={Paper}
+        sx={{ backgroundColor: "rgb(16, 20, 24)" }}
+      >
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>

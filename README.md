@@ -4,7 +4,7 @@ App that monitors web sites and reports their availability. This tool is intende
 
 
 <p align="center">
-  <img src="imgs/front_ss.png"  alt="ui"/>
+  <img src="imgs/ui_ui.png"  alt="ui"/>
 </p>
 
 #### Prod prerequisites
