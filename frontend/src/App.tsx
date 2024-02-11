@@ -27,10 +27,8 @@ function App() {
   }
 
   const convertIsoString = (isoDatetimeString: string): string => {
-    // TODO convert to Date obj to apply timezone (machine/brwoser specific time)
-    let date = isoDatetimeString.split('T')[0];
-    let time = isoDatetimeString.split('T')[1].split('.')[0];   // time without miliseconds
-    return `${date} ${time}`;
+    let date = new Date(isoDatetimeString);
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
   }
 
   const getTrafficLight = (trafficLightValue: string): any => {
