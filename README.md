@@ -12,13 +12,20 @@ App that monitors web sites and reports their availability. This tool is intende
 
 #### Running the app
 
+0. Clone repo
+
+```sh
+git clone https://github.com/Workata/web-health-checker.git
+cd web-health-checker
+```
+
 1. Create a config file (based on example)
 ```sh
 cd backend
 cp -n config_example.yaml config.yaml
 ```
 
-2. Run app with
+2. Run the app
 ```sh
 docker compose build
 docker compose up
