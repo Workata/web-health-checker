@@ -25,7 +25,7 @@ docker compose up
 
 #### Development
 
-[Create config file](####running-the-app)
+[Create config file](#running-the-app)
 
 Run redis
 ```sh
