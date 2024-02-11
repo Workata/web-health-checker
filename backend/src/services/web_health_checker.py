@@ -10,11 +10,12 @@ class WebHealthChecker:
     def check(self, service: ServiceConfig) -> HealthCheckResult:
         try:
             res = requests.get(service.url)
-        except RequestException:
+        except RequestException as err:
             # * will catch ConnectionError, HTTPError, Timeout, TooManyRedirects
             return HealthCheckResult(
                 state=State.RED,
                 message="There is a problem with connecting to the server. For details see logs.",
+                error_message=str(err),
             )
         if res.status_code != service.expected_status_code:
             return HealthCheckResult(

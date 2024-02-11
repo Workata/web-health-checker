@@ -4,7 +4,7 @@ services:
     # * this example check should should be green
   - url: https://www.w3schools.com/
     expected_status_code: 200
-    xpath: "//*[contains(text(), 'Log in')]"
+    xpath: "//*[contains(text(), 'Log in')]"    # use xpath parameter to check if specific contect exists on a page
 
     # * this one should be yellow
   - url: https://github.com/

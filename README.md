@@ -12,14 +12,28 @@ App that monitors web sites and reports their availability. This tool is intende
 
 #### Running the app
 
+0. Clone repo
+
+```sh
+git clone https://github.com/Workata/web-health-checker.git
+cd web-health-checker
+```
+
 1. Create a config file (based on example)
 ```sh
 cd backend
 cp -n config_example.yaml config.yaml
 ```
 
-2. Run app with
+2. Run the app
 ```sh
+docker compose build
+docker compose up
+```
+
+*Note: If you change a config file while app is running you need to restart*
+```sh
+docker compose down
 docker compose up
 ```
 
@@ -34,7 +48,7 @@ docker compose up
 
 #### Development
 
-[Create config file](#running-the-app)
+[Create a config file](#running-the-app)
 
 Run redis
 ```sh
@@ -63,9 +77,3 @@ cd frontend
 npm install --force
 npm start
 ```
-
-
-TODO:
-- [ ] Logs (use python logging with custom setup)
-- [ ] Code cleanup
-- [ ] config file description
